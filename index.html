@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Daily Planner — בס"ד</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#F5F4F0;--card:#FFF;--border:#DEDEDE;--text:#111;--muted:#888;
+  --radius:8px;--shadow:0 1px 4px rgba(0,0,0,0.07);
+}
+body{font-family:'Georgia',serif;background:var(--bg);color:var(--text);min-height:100vh}
+
+/* ── HEADER ── */
+.app-header{
+  background:var(--card);border-bottom:1px solid var(--border);
+  padding:14px 28px;display:flex;align-items:center;justify-content:space-between;
+  position:sticky;top:0;z-index:200;
+}
+.app-brand{display:flex;align-items:baseline;gap:10px}
+.app-brand h1{font-size:18px;letter-spacing:4px;text-transform:uppercase;font-weight:700}
+.app-brand span{font-size:13px;color:var(--muted)}
+.nav-tabs{display:flex;gap:6px}
+.nav-tab{
+  padding:6px 18px;border:1.5px solid var(--border);background:transparent;
+  border-radius:20px;cursor:pointer;font-size:12px;letter-spacing:2px;
+  text-transform:uppercase;font-family:inherit;transition:all .2s;
+}
+.nav-tab.active{background:var(--text);color:#fff;border-color:var(--text)}
+
+/* ── DATE NAV ── */
+.date-nav{
+  background:var(--card);border-bottom:1px solid var(--border);
+  padding:12px 28px;display:flex;align-items:center;gap:16px;
+}
+.date-nav-btn{
+  width:34px;height:34px;border:1.5px solid var(--border);background:transparent;
+  border-radius:50%;cursor:pointer;font-size:18px;display:flex;align-items:center;
+  justify-content:center;transition:all .2s;flex-shrink:0;
+}
+.date-nav-btn:hover{background:var(--text);color:#fff;border-color:var(--text)}
+.date-center{flex:1;text-align:center}
+.date-main{font-size:16px;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:6px}
+.date-meta{display:flex;gap:20px;justify-content:center;font-size:11px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px}
+.date-meta strong{color:var(--text)}
+.dow-row{display:flex;gap:5px;justify-content:center}
+.dow-pill{
+  width:26px;height:26px;border-radius:50%;border:1.5px solid var(--border);
+  background:transparent;font-size:10px;display:flex;align-items:center;justify-content:center;
+  font-family:inherit;letter-spacing:0;cursor:pointer;transition:all .15s;
+}
+.dow-pill.active{background:var(--text);color:#fff;border-color:var(--text)}
+.today-btn{
+  padding:6px 14px;border:1.5px solid var(--border);background:transparent;
+  border-radius:4px;cursor:pointer;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;
+  font-family:inherit;transition:all .2s;flex-shrink:0;
+}
+.today-btn:hover{background:var(--text);color:#fff;border-color:var(--text)}
+
+/* ── PROGRESS BAR ── */
+.progress-bar-wrap{height:4px;background:#EEE}
+.progress-bar{height:4px;background:#111;transition:width .4s ease;width:0%}
+
+/* ── CONTENT ── */
+.content{max-width:1120px;margin:0 auto;padding:24px}
+.tab-content{display:none}
+.tab-content.active{display:block}
+
+/* ── CARD ── */
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow)}
+.card-title{
+  font-size:11px;font-weight:700;letter-spacing:4px;text-transform:uppercase;
+  text-align:center;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--border);
+}
+
+/* ── DAILY LAYOUT ── */
+.daily-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.right-col{display:flex;flex-direction:column;gap:16px}
+.bottom-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}
+
+/* ── CHECKBOX ── */
+.chk-item{
+  display:flex;align-items:center;gap:10px;padding:9px 4px;
+  cursor:pointer;user-select:none;border-bottom:1px solid #F2F2F2;transition:background .1s;
+}
+.chk-item:last-child{border-bottom:none}
+.chk-item:hover{background:#FAFAFA}
+.chk-box{
+  width:20px;height:20px;border:1.5px solid #CCC;border-radius:3px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;transition:all .2s;
+}
+.chk-box.checked{background:var(--text);border-color:var(--text)}
+.chk-box.checked::after{content:'✓';color:#fff;font-size:12px}
+.chk-label{font-size:13px;letter-spacing:0.3px}
+.chk-icon{font-size:17px;flex-shrink:0}
+
+/* ── HABITS 2-col grid ── */
+.habits-grid{display:grid;grid-template-columns:1fr 1fr}
+.habit-item{
+  display:flex;align-items:center;gap:8px;padding:10px 8px;
+  cursor:pointer;user-select:none;border-bottom:1px solid #F2F2F2;transition:background .1s;
+}
+.habit-item:hover{background:#FAFAFA}
+.habit-item:nth-child(odd){border-right:1px solid #F2F2F2}
+
+/* ── WAKE UP ── */
+.wake-input{
+  width:100%;padding:10px;font-size:32px;font-family:inherit;text-align:center;
+  border:1.5px solid var(--border);border-radius:6px;outline:none;
+  transition:border-color .2s;background:transparent;
+}
+.wake-input:focus{border-color:var(--text)}
+.wake-quote{text-align:center;font-style:italic;font-size:11px;color:var(--muted);margin-top:10px}
+
+/* ── SPORT ── */
+.sport-item{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid #F2F2F2}
+.sport-item:last-child{border-bottom:none}
+.sport-label{font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--muted)}
+.sport-unit{font-size:11px;color:#BBB;margin-left:4px}
+.sport-input{
+  width:80px;padding:6px 8px;border:1.5px solid var(--border);border-radius:4px;
+  font-size:15px;font-family:inherit;text-align:center;outline:none;transition:border-color .2s;
+}
+.sport-input:focus{border-color:var(--text)}
+
+/* ── NIGHT grid (2 col) ── */
+.night-grid{display:grid;grid-template-columns:1fr 1fr}
+.night-item{
+  display:flex;align-items:center;gap:8px;padding:10px 8px;
+  cursor:pointer;user-select:none;border-bottom:1px solid #F2F2F2;transition:background .1s;
+}
+.night-item:hover{background:#FAFAFA}
+.night-item:nth-child(odd){border-right:1px solid #F2F2F2}
+
+/* ── CALLS ── */
+.calls-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:4px}
+.call-cell{
+  border:1px solid var(--border);padding:6px 4px;font-size:12px;min-height:34px;
+  outline:none;font-family:inherit;text-align:center;background:transparent;
+  border-radius:3px;transition:all .2s;width:100%;
+}
+.call-cell:focus{border-color:var(--text);background:#fff}
+.call-cell.done{background:#F0F0EE;text-decoration:line-through;color:#AAA}
+
+/* ── MEETINGS ── */
+.meetings-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.meeting-cell{
+  border:1.5px solid var(--border);padding:10px;min-height:70px;font-size:13px;
+  font-family:inherit;outline:none;border-radius:4px;resize:none;transition:border-color .2s;
+  background:transparent;width:100%;
+}
+.meeting-cell:focus{border-color:var(--text)}
+
+/* ── QUOTE ── */
+.card-quote{text-align:center;font-style:italic;font-size:11px;color:var(--muted);padding-top:12px;margin-top:8px;border-top:1px solid #F2F2F2}
+
+/* ── GOALS ── */
+.goals-header-quote{
+  text-align:center;font-style:italic;font-size:13px;color:var(--muted);
+  max-width:580px;margin:0 auto 24px;line-height:1.6;
+}
+.goals-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.goal-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid #F2F2F2}
+.goal-row:last-child{border-bottom:none}
+.goal-num{font-size:12px;color:var(--muted);width:18px;flex-shrink:0}
+.goal-input{
+  flex:1;border:none;border-bottom:1.5px solid #EEE;outline:none;font-size:14px;
+  font-family:inherit;padding:3px 2px;background:transparent;transition:border-color .2s;
+}
+.goal-input:focus{border-color:var(--text)}
+
+/* ── HISTORY ── */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:20px}
+.stat-card{text-align:center;padding:24px 16px}
+.stat-value{display:block;font-size:40px;font-weight:700;line-height:1}
+.stat-label{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-top:8px;display:block}
+.heatmap-wrap{overflow-x:auto;padding:8px 0}
+.heatmap{display:flex;gap:3px}
+.heatmap-col{display:flex;flex-direction:column;gap:3px}
+.hm-cell{
+  width:14px;height:14px;border-radius:2px;background:#EEE;
+  cursor:pointer;transition:transform .1s;flex-shrink:0;
+}
+.hm-cell:hover{transform:scale(1.4)}
+.hm-cell.l1{background:#D4E8D4}.hm-cell.l2{background:#90C890}
+.hm-cell.l3{background:#4CAF50}.hm-cell.l4{background:#1B6B1B}
+.hm-legend{display:flex;align-items:center;gap:6px;justify-content:flex-end;margin-top:10px;font-size:11px;color:var(--muted)}
+.hm-swatch{width:12px;height:12px;border-radius:2px}
+.recent-row{
+  display:flex;align-items:center;gap:14px;padding:12px 0;
+  border-bottom:1px solid #F2F2F2;cursor:pointer;transition:background .1s;
+}
+.recent-row:hover{background:#FAFAFA;margin:0 -8px;padding:12px 8px}
+.recent-row:last-child{border-bottom:none}
+.recent-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.recent-date{font-weight:700;font-size:14px;min-width:110px}
+.recent-chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{font-size:11px;color:var(--muted);background:#F5F4F0;padding:2px 8px;border-radius:10px;border:1px solid #E8E8E8}
+
+/* ── SAVE TOAST ── */
+.toast{
+  position:fixed;bottom:24px;right:24px;background:var(--text);color:#fff;
+  padding:8px 18px;border-radius:20px;font-size:12px;letter-spacing:1px;
+  opacity:0;transition:opacity .3s;pointer-events:none;z-index:999;
+}
+.toast.show{opacity:1}
+
+/* ── RESPONSIVE ── */
+@media(max-width:780px){
+  .daily-grid,.bottom-row,.goals-grid,.stats-grid{grid-template-columns:1fr}
+  .meetings-grid{grid-template-columns:1fr 1fr}
+  .stats-grid{grid-template-columns:1fr 1fr}
+  .content{padding:14px}
+  .calls-grid{grid-template-columns:repeat(5,1fr)}
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════
+     HEADER
+══════════════════════════════════════════ -->
+<header class="app-header">
+  <div class="app-brand">
+    <h1>Daily Planner</h1>
+    <span>בס"ד</span>
+  </div>
+  <nav class="nav-tabs">
+    <button class="nav-tab active" data-tab="daily">Daily</button>
+    <button class="nav-tab" data-tab="goals">Goals</button>
+    <button class="nav-tab" data-tab="history">History</button>
+  </nav>
+</header>
+
+<!-- ══════════════════════════════════════════
+     DATE NAVIGATION (daily only)
+══════════════════════════════════════════ -->
+<div class="date-nav" id="dateNav">
+  <button class="date-nav-btn" id="prevDay">‹</button>
+  <div class="date-center">
+    <div class="date-main" id="dateDisplay"></div>
+    <div class="date-meta">
+      <span>Week <strong id="weekNum"></strong></span>
+      <span>Month <strong id="monthNum"></strong></span>
+      <span>Quarter <strong id="quarterNum"></strong></span>
+    </div>
+    <div class="dow-row" id="dowRow"></div>
+  </div>
+  <button class="today-btn" id="todayBtn">Today</button>
+  <button class="date-nav-btn" id="nextDay">›</button>
+</div>
+<div class="progress-bar-wrap"><div class="progress-bar" id="progressBar"></div></div>
+
+<!-- ══════════════════════════════════════════
+     MAIN
+══════════════════════════════════════════ -->
+<main class="content">
+
+<!-- ─── DAILY TAB ─── -->
+<div class="tab-content active" id="tab-daily">
+
+  <div class="daily-grid">
+
+    <!-- HABITS -->
+    <div class="card">
+      <div class="card-title">Habits</div>
+      <div class="habits-grid" id="habitsGrid"></div>
+      <div class="card-quote">For every disciplined effort there is a multiple reward.</div>
+    </div>
+
+    <!-- RIGHT: Wake Up + Sport -->
+    <div class="right-col">
+      <div class="card">
+        <div class="card-title">Wake Up Time</div>
+        <input type="time" class="wake-input" id="wakeTime">
+        <p class="wake-quote">Lose an hour in the morning, and you will be all day hunting for it.</p>
+      </div>
+      <div class="card">
+        <div class="card-title">Sport</div>
+        <div class="sport-item">
+          <span class="sport-label">Push Ups</span>
+          <div><input type="number" class="sport-input" id="sPushups" min="0" placeholder="0"><span class="sport-unit">reps</span></div>
+        </div>
+        <div class="sport-item">
+          <span class="sport-label">Pull Ups</span>
+          <div><input type="number" class="sport-input" id="sPullups" min="0" placeholder="0"><span class="sport-unit">reps</span></div>
+        </div>
+        <div class="sport-item">
+          <span class="sport-label">Squats</span>
+          <div><input type="number" class="sport-input" id="sSquats" min="0" placeholder="0"><span class="sport-unit">reps</span></div>
+        </div>
+        <div class="sport-item">
+          <span class="sport-label">Run</span>
+          <div><input type="number" class="sport-input" id="sRun" min="0" step="0.1" placeholder="0"><span class="sport-unit">km</span></div>
+        </div>
+        <div class="card-quote">Choose between what you want now and what you want most.</div>
+      </div>
+    </div>
+
+    <!-- SPIRITUALITY -->
+    <div class="card">
+      <div class="card-title">Spirituality</div>
+      <div class="chk-item" data-key="shaharit" id="row-shaharit">
+        <div class="chk-box" id="chk-shaharit"></div>
+        <span class="chk-icon">🌅</span>
+        <span class="chk-label">Shaharit</span>
+      </div>
+      <div class="chk-item" data-key="minha" id="row-minha">
+        <div class="chk-box" id="chk-minha"></div>
+        <span class="chk-icon">☀️</span>
+        <span class="chk-label">Minha</span>
+      </div>
+      <div class="chk-item" data-key="arvith" id="row-arvith">
+        <div class="chk-box" id="chk-arvith"></div>
+        <span class="chk-icon">🌙</span>
+        <span class="chk-label">Arvith</span>
+      </div>
+    </div>
+
+    <!-- NUTRITION -->
+    <div class="card">
+      <div class="card-title">Nutrition</div>
+      <div id="nutritionList"></div>
+    </div>
+
+  </div><!-- /daily-grid -->
+
+  <!-- CALLS + NIGHT -->
+  <div class="bottom-row">
+
+    <div class="card">
+      <div class="card-title">Calls</div>
+      <div class="calls-grid" id="callsGrid"></div>
+      <div class="card-quote">Prospecting a day keeps poverty away.</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Night</div>
+      <div class="night-grid" id="nightGrid"></div>
+      <div class="card-quote">Spectacular achievement is always preceded by unspectacular preparation.</div>
+    </div>
+
+  </div>
+
+  <!-- MEETINGS -->
+  <div class="card" style="margin-top:16px">
+    <div class="card-title">Meetings</div>
+    <div class="meetings-grid">
+      <textarea class="meeting-cell" id="meeting0" placeholder="Meeting 1…"></textarea>
+      <textarea class="meeting-cell" id="meeting1" placeholder="Meeting 2…"></textarea>
+      <textarea class="meeting-cell" id="meeting2" placeholder="Meeting 3…"></textarea>
+    </div>
+  </div>
+
+</div><!-- /tab-daily -->
+
+<!-- ─── GOALS TAB ─── -->
+<div class="tab-content" id="tab-goals">
+  <p class="goals-header-quote">
+    "By recording your dreams and goals on paper, you set in motion the process of becoming the person you most want to be.
+    Put your future in good hands — your own."
+  </p>
+  <div class="goals-grid" id="goalsGrid"></div>
+</div>
+
+<!-- ─── HISTORY TAB ─── -->
+<div class="tab-content" id="tab-history">
+  <div class="stats-grid" id="statsGrid"></div>
+  <div class="card" style="margin-bottom:16px">
+    <div class="card-title">Activity — Last 365 Days</div>
+    <div class="heatmap-wrap"><div class="heatmap" id="heatmap"></div></div>
+    <div class="hm-legend">
+      Less
+      <div class="hm-swatch" style="background:#EEE"></div>
+      <div class="hm-swatch l1 hm-swatch"></div>
+      <div class="hm-swatch l2 hm-swatch"></div>
+      <div class="hm-swatch l3 hm-swatch"></div>
+      <div class="hm-swatch l4 hm-swatch"></div>
+      More
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Recent Entries</div>
+    <div id="recentEntries"></div>
+  </div>
+</div>
+
+</main>
+
+<div class="toast" id="toast">Saved ✓</div>
+
+<!-- ══════════════════════════════════════════
+     SCRIPT
+══════════════════════════════════════════ -->
+<script>
+// ── CONFIG ──────────────────────────────────
+const HABITS = [
+  {id:'h0', icon:'🏃', label:'Cardio'},
+  {id:'h1', icon:'🎧', label:'Learning'},
+  {id:'h2', icon:'🧘', label:'Meditation'},
+  {id:'h3', icon:'💪', label:'Training'},
+  {id:'h4', icon:'📚', label:'Reading'},
+  {id:'h5', icon:'🧠', label:'Growth'},
+  {id:'h6', icon:'🎵', label:'Music'},
+  {id:'h7', icon:'🕯️', label:'Torah Study'},
+];
+
+const NIGHT = [
+  {id:'n0', icon:'👨‍👩‍👧', label:'Family'},
+  {id:'n1', icon:'🧘', label:'Relax'},
+  {id:'n2', icon:'💻', label:'Review Day'},
+  {id:'n3', icon:'📖', label:'Evening Read'},
+  {id:'n4', icon:'👔', label:'Prep Tomorrow'},
+  {id:'n5', icon:'✍️', label:'Journaling'},
+];
+
+const GOALS_CFG = [
+  {key:'today',    label:'Today',    n:3},
+  {key:'week',     label:'Week',     n:3},
+  {key:'month',    label:'Month',    n:4},
+  {key:'quarter',  label:'Quarter',  n:3},
+  {key:'semester', label:'Semester', n:3},
+  {key:'year',     label:'Year',     n:2},
+];
+
+const SK = 'dplanner_v1';
+const GK = 'dplanner_goals_v1';
+
+// ── STATE ────────────────────────────────────
+let curDate = today();
+let allData = load(SK) || {};
+let goalsData = load(GK) || {};
+let saveTimer = null;
+
+function today(){
+  const d = new Date();
+  d.setHours(0,0,0,0);
+  return d;
+}
+
+function load(key){ try{ return JSON.parse(localStorage.getItem(key)); }catch{ return null; } }
+function save(key, val){ localStorage.setItem(key, JSON.stringify(val)); }
+
+// ── DATE UTILS ───────────────────────────────
+function dk(d){ return d.toISOString().slice(0,10); }
+
+function weekNum(d){
+  const tmp = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+  const day = tmp.getUTCDay()||7;
+  tmp.setUTCDate(tmp.getUTCDate()+4-day);
+  const ys = new Date(Date.UTC(tmp.getUTCFullYear(),0,1));
+  return Math.ceil(((tmp-ys)/864e5+1)/7);
+}
+
+function quarter(d){ return Math.floor(d.getMonth()/3)+1; }
+
+const MONTHS = ['January','February','March','April','May','June',
+                'July','August','September','October','November','December'];
+const DAYS   = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+const DOW    = ['S','M','T','W','T','F','S'];
+
+function fmtDate(d){
+  return `${DAYS[d.getDay()]}, ${MONTHS[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;
+}
+
+function addDays(d, n){
+  const r = new Date(d);
+  r.setDate(r.getDate()+n);
+  return r;
+}
+
+function parseDate(str){
+  // parse YYYY-MM-DD safely in local time
+  const [y,m,day] = str.split('-').map(Number);
+  const d = new Date(y, m-1, day);
+  d.setHours(0,0,0,0);
+  return d;
+}
+
+// ── DAY DATA ─────────────────────────────────
+function emptyDay(){
+  return {
+    habits:{}, wakeTime:'',
+    sport:{pushups:'',pullups:'',squats:'',run:''},
+    prayer:{shaharit:false, minha:false, arvith:false},
+    nutrition:[false,false,false,false,false],
+    calls: Array(25).fill(''),
+    meetings:['','',''],
+    night:{},
+  };
+}
+
+function getDay(d){
+  const k = dk(d);
+  if(!allData[k]) allData[k] = emptyDay();
+  return allData[k];
+}
+
+function scheduleSave(){
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(()=>{
+    save(SK, allData);
+    save(GK, goalsData);
+    showToast();
+  }, 700);
+}
+
+function showToast(){
+  const t = document.getElementById('toast');
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 1800);
+}
+
+// ── COMPLETION SCORE ──────────────────────────
+function scoreDay(data){
+  if(!data) return 0;
+  let done=0, total=0;
+  // habits
+  HABITS.forEach(h=>{ total++; if(data.habits[h.id]) done++; });
+  // prayer
+  ['shaharit','minha','arvith'].forEach(p=>{ total++; if(data.prayer[p]) done++; });
+  // nutrition
+  data.nutrition.forEach(v=>{ total++; if(v) done++; });
+  // sport (any filled = 1 point each)
+  ['pushups','pullups','squats','run'].forEach(k=>{ total++; if(data.sport[k]>0) done++; });
+  // night
+  NIGHT.forEach(n=>{ total++; if(data.night[n.id]) done++; });
+  return {done, total, pct: Math.round(done/total*100)};
+}
+
+function level(data){
+  if(!data) return 0;
+  const {pct} = scoreDay(data);
+  if(pct===0) return 0;
+  if(pct<25) return 1;
+  if(pct<50) return 2;
+  if(pct<75) return 3;
+  return 4;
+}
+
+// ── RENDER HELPERS ────────────────────────────
+function h(str){ return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+// ── RENDER DATE NAV ───────────────────────────
+function renderDateNav(){
+  document.getElementById('dateDisplay').textContent = fmtDate(curDate);
+  document.getElementById('weekNum').textContent  = weekNum(curDate);
+  document.getElementById('monthNum').textContent = curDate.getMonth()+1;
+  document.getElementById('quarterNum').textContent = 'Q'+quarter(curDate);
+
+  const dow = document.getElementById('dowRow');
+  dow.innerHTML = DOW.map((d,i)=>
+    `<div class="dow-pill${i===curDate.getDay()?' active':''}">${d}</div>`
+  ).join('');
+
+  // progress bar
+  const data = allData[dk(curDate)];
+  const pct = data ? scoreDay(data).pct : 0;
+  document.getElementById('progressBar').style.width = pct+'%';
+}
+
+// ── RENDER DAILY ──────────────────────────────
+function renderDaily(){
+  renderDateNav();
+  const data = getDay(curDate);
+
+  // Habits
+  document.getElementById('habitsGrid').innerHTML = HABITS.map(hb=>`
+    <div class="habit-item" data-habit="${hb.id}">
+      <div class="chk-box${data.habits[hb.id]?' checked':''}" id="hbox-${hb.id}"></div>
+      <span class="chk-icon">${hb.icon}</span>
+      <span style="font-size:13px">${hb.label}</span>
+    </div>`).join('');
+
+  // Wake time
+  document.getElementById('wakeTime').value = data.wakeTime||'';
+
+  // Sport
+  document.getElementById('sPushups').value = data.sport.pushups||'';
+  document.getElementById('sPullups').value = data.sport.pullups||'';
+  document.getElementById('sSquats').value  = data.sport.squats||'';
+  document.getElementById('sRun').value     = data.sport.run||'';
+
+  // Prayer
+  ['shaharit','minha','arvith'].forEach(p=>{
+    const el = document.getElementById('chk-'+p);
+    if(el) el.className = 'chk-box'+(data.prayer[p]?' checked':'');
+  });
+
+  // Nutrition
+  document.getElementById('nutritionList').innerHTML = [1,2,3,4,5].map((n,i)=>`
+    <div class="chk-item" data-nut="${i}">
+      <div class="chk-box${data.nutrition[i]?' checked':''}"></div>
+      <span class="chk-icon">🥗</span>
+      <span class="chk-label">Meal ${n}</span>
+    </div>`).join('');
+
+  // Calls (25 cells, 5×5)
+  document.getElementById('callsGrid').innerHTML = data.calls.map((v,i)=>`
+    <input class="call-cell" data-call="${i}" type="text" value="${h(v)}" placeholder="—" title="Double-click to mark done">`
+  ).join('');
+
+  // Night
+  document.getElementById('nightGrid').innerHTML = NIGHT.map(n=>`
+    <div class="night-item" data-night="${n.id}">
+      <div class="chk-box${data.night[n.id]?' checked':''}" id="nbox-${n.id}"></div>
+      <span class="chk-icon">${n.icon}</span>
+      <span style="font-size:13px">${n.label}</span>
+    </div>`).join('');
+
+  // Meetings
+  data.meetings.forEach((m,i)=>{
+    const el = document.getElementById('meeting'+i);
+    if(el) el.value = m||'';
+  });
+}
+
+// ── RENDER GOALS ──────────────────────────────
+function renderGoals(){
+  document.getElementById('goalsGrid').innerHTML = GOALS_CFG.map(cfg=>{
+    if(!goalsData[cfg.key]) goalsData[cfg.key]=Array(cfg.n).fill('');
+    return `<div class="card">
+      <div class="card-title">${cfg.label}</div>
+      ${goalsData[cfg.key].map((v,i)=>`
+        <div class="goal-row">
+          <span class="goal-num">${i+1}.</span>
+          <input class="goal-input" data-gkey="${cfg.key}" data-gidx="${i}" type="text" value="${h(v)}" placeholder="…">
+        </div>`).join('')}
+    </div>`;
+  }).join('');
+}
+
+// ── RENDER HISTORY ────────────────────────────
+function renderHistory(){
+  // Stats
+  const keys = Object.keys(allData).sort();
+  const total = keys.length;
+
+  let streak=0, tmp=new Date(today());
+  while(true){
+    const k=dk(tmp), d=allData[k];
+    if(d && level(d)>0){ streak++; tmp=addDays(tmp,-1); }
+    else break;
+  }
+
+  let prayStreak=0; tmp=new Date(today());
+  while(true){
+    const k=dk(tmp), d=allData[k];
+    if(d && (d.prayer.shaharit||d.prayer.minha||d.prayer.arvith)){ prayStreak++; tmp=addDays(tmp,-1); }
+    else break;
+  }
+
+  let avgPct=0;
+  keys.forEach(k=>{ avgPct += scoreDay(allData[k]).pct; });
+  avgPct = total>0 ? Math.round(avgPct/total) : 0;
+
+  const dotColor = ['#EEE','#D4E8D4','#90C890','#4CAF50','#1B6B1B'];
+
+  document.getElementById('statsGrid').innerHTML = [
+    {v:total,   l:'Days Logged'},
+    {v:streak,  l:'Day Streak'},
+    {v:avgPct+'%', l:'Avg Completion'},
+    {v:prayStreak, l:'Prayer Streak'},
+  ].map(s=>`<div class="card stat-card">
+      <span class="stat-value">${s.v}</span>
+      <span class="stat-label">${s.l}</span>
+    </div>`).join('');
+
+  // Heatmap — 52 weeks × 7 days
+  const hm = document.getElementById('heatmap');
+  const t = new Date(today());
+  // start from 364 days ago, align to start of week
+  const start = addDays(t, -363);
+  // group into columns of 7
+  const cols = [];
+  let col = [];
+  for(let i=0; i<365; i++){
+    const d = addDays(start, i);
+    const k = dk(d);
+    const lv = level(allData[k]);
+    col.push(`<div class="hm-cell${lv?' l'+lv:''}" title="${fmtDate(d)}" data-date="${k}"></div>`);
+    if(col.length===7){ cols.push(col); col=[]; }
+  }
+  if(col.length) cols.push(col);
+  hm.innerHTML = cols.map(c=>`<div class="heatmap-col">${c.join('')}</div>`).join('');
+
+  // Fix legend swatches
+  document.querySelectorAll('.hm-swatch').forEach((el,i)=>{
+    if(i>0) el.style.background = dotColor[i];
+  });
+
+  // Recent
+  const recent = [...keys].reverse().slice(0,12);
+  const re = document.getElementById('recentEntries');
+  if(!recent.length){
+    re.innerHTML='<p style="text-align:center;color:#888;padding:20px">No entries yet — start logging today!</p>';
+    return;
+  }
+  re.innerHTML = recent.map(k=>{
+    const d = allData[k];
+    const lv = level(d);
+    const s  = scoreDay(d);
+    const prayDone = [d.prayer.shaharit, d.prayer.minha, d.prayer.arvith].filter(Boolean).length;
+    const habDone  = HABITS.filter(hb=>d.habits[hb.id]).length;
+    const nutDone  = d.nutrition.filter(Boolean).length;
+    return `<div class="recent-row" data-date="${k}">
+      <div class="recent-dot" style="background:${dotColor[lv]}"></div>
+      <span class="recent-date">${k}</span>
+      <div class="recent-chips">
+        <span class="chip">✅ ${s.pct}%</span>
+        <span class="chip">🙏 ${prayDone}/3</span>
+        <span class="chip">💪 ${habDone}/${HABITS.length}</span>
+        <span class="chip">🥗 ${nutDone}/5</span>
+        ${d.wakeTime?`<span class="chip">⏰ ${d.wakeTime}</span>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── TAB SWITCHING ─────────────────────────────
+function switchTab(name){
+  document.querySelectorAll('.tab-content').forEach(el=>el.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(el=>el.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  document.querySelector(`.nav-tab[data-tab="${name}"]`).classList.add('active');
+  document.getElementById('dateNav').style.display = name==='daily'?'flex':'none';
+  document.getElementById('progressBar').parentElement.style.display = name==='daily'?'block':'none';
+  if(name==='goals') renderGoals();
+  if(name==='history') renderHistory();
+}
+
+// ── EVENTS ───────────────────────────────────
+// Tab buttons
+document.querySelectorAll('.nav-tab').forEach(btn=>{
+  btn.addEventListener('click',()=>switchTab(btn.dataset.tab));
+});
+
+// Date nav
+document.getElementById('prevDay').addEventListener('click',()=>{ curDate=addDays(curDate,-1); renderDaily(); });
+document.getElementById('nextDay').addEventListener('click',()=>{ curDate=addDays(curDate,1);  renderDaily(); });
+document.getElementById('todayBtn').addEventListener('click',()=>{ curDate=today(); renderDaily(); });
+
+// Habit checkboxes (delegated)
+document.getElementById('habitsGrid').addEventListener('click',e=>{
+  const item = e.target.closest('[data-habit]');
+  if(!item) return;
+  const id = item.dataset.habit;
+  const data = getDay(curDate);
+  data.habits[id] = !data.habits[id];
+  item.querySelector('.chk-box').className = 'chk-box'+(data.habits[id]?' checked':'');
+  updateProgress();
+  scheduleSave();
+});
+
+// Prayer
+['shaharit','minha','arvith'].forEach(p=>{
+  document.getElementById('row-'+p).addEventListener('click',()=>{
+    const data = getDay(curDate);
+    data.prayer[p] = !data.prayer[p];
+    document.getElementById('chk-'+p).className = 'chk-box'+(data.prayer[p]?' checked':'');
+    updateProgress(); scheduleSave();
+  });
+});
+
+// Nutrition (delegated)
+document.getElementById('nutritionList').addEventListener('click',e=>{
+  const item = e.target.closest('[data-nut]');
+  if(!item) return;
+  const i = +item.dataset.nut;
+  const data = getDay(curDate);
+  data.nutrition[i] = !data.nutrition[i];
+  item.querySelector('.chk-box').className = 'chk-box'+(data.nutrition[i]?' checked':'');
+  updateProgress(); scheduleSave();
+});
+
+// Night (delegated)
+document.getElementById('nightGrid').addEventListener('click',e=>{
+  const item = e.target.closest('[data-night]');
+  if(!item) return;
+  const id = item.dataset.night;
+  const data = getDay(curDate);
+  data.night[id] = !data.night[id];
+  item.querySelector('.chk-box').className = 'chk-box'+(data.night[id]?' checked':'');
+  updateProgress(); scheduleSave();
+});
+
+// Wake time
+document.getElementById('wakeTime').addEventListener('change',e=>{
+  getDay(curDate).wakeTime = e.target.value;
+  scheduleSave();
+});
+
+// Sport inputs
+['Pushups','Pullups','Squats','Run'].forEach(name=>{
+  document.getElementById('s'+name).addEventListener('input',e=>{
+    getDay(curDate).sport[name.toLowerCase()] = parseFloat(e.target.value)||'';
+    updateProgress(); scheduleSave();
+  });
+});
+
+// Calls (delegated input + dblclick to mark done)
+document.getElementById('callsGrid').addEventListener('input',e=>{
+  if(!e.target.matches('[data-call]')) return;
+  getDay(curDate).calls[+e.target.dataset.call] = e.target.value;
+  scheduleSave();
+});
+document.getElementById('callsGrid').addEventListener('dblclick',e=>{
+  if(!e.target.matches('[data-call]')) return;
+  e.target.classList.toggle('done');
+});
+
+// Meetings
+[0,1,2].forEach(i=>{
+  document.getElementById('meeting'+i).addEventListener('input',e=>{
+    getDay(curDate).meetings[i] = e.target.value;
+    scheduleSave();
+  });
+});
+
+// Goals (delegated)
+document.getElementById('goalsGrid').addEventListener('input',e=>{
+  if(!e.target.matches('[data-gkey]')) return;
+  const {gkey, gidx} = e.target.dataset;
+  if(!goalsData[gkey]) goalsData[gkey]=[];
+  goalsData[gkey][+gidx] = e.target.value;
+  scheduleSave();
+});
+
+// Heatmap click → jump to date
+document.getElementById('heatmap').addEventListener('click',e=>{
+  const cell = e.target.closest('[data-date]');
+  if(!cell) return;
+  curDate = parseDate(cell.dataset.date);
+  switchTab('daily');
+  renderDaily();
+});
+
+// Recent entries click
+document.getElementById('recentEntries').addEventListener('click',e=>{
+  const row = e.target.closest('[data-date]');
+  if(!row) return;
+  curDate = parseDate(row.dataset.date);
+  switchTab('daily');
+  renderDaily();
+});
+
+// Keyboard navigation
+document.addEventListener('keydown',e=>{
+  if(['INPUT','TEXTAREA'].includes(e.target.tagName)) return;
+  if(e.key==='ArrowLeft')  { curDate=addDays(curDate,-1); renderDaily(); }
+  if(e.key==='ArrowRight') { curDate=addDays(curDate,1);  renderDaily(); }
+  if(e.key==='t'||e.key==='T') { curDate=today(); renderDaily(); }
+});
+
+function updateProgress(){
+  const data = allData[dk(curDate)];
+  const pct = data ? scoreDay(data).pct : 0;
+  document.getElementById('progressBar').style.width = pct+'%';
+}
+
+// ── INIT ──────────────────────────────────────
+renderDaily();
+</script>
+</body>
+</html>
