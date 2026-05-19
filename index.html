@@ -103,7 +103,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
 .progress-bar{height:3px;background:linear-gradient(90deg,var(--accent),#8B5CF6);transition:width .5s cubic-bezier(.4,0,.2,1);width:0%}
 
 /* ── CONTENT ── */
-.content{max-width:1140px;margin:0 auto;padding:16px 24px}
+.content{max-width:1140px;margin:0 auto;padding:28px 24px}
 .tab-content{display:none}
 .tab-content.active{display:block}
 
@@ -121,9 +121,9 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
 }
 
 /* ── DAILY LAYOUT ── */
-.daily-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:start}
-.right-col{display:flex;flex-direction:column;gap:10px}
-.bottom-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px;align-items:start}
+.daily-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start}
+.right-col{display:flex;flex-direction:column;gap:18px}
+.bottom-row{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:18px;align-items:start}
 
 /* ── CHECKBOX ── */
 .chk-item{
@@ -394,15 +394,25 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
 
   </div><!-- /daily-grid -->
 
-  <!-- NIGHT -->
-  <div class="card" style="margin-top:14px">
-    <div class="card-title">Night</div>
-    <div class="night-grid" id="nightGrid"></div>
-    <div class="card-quote">Spectacular achievement is always preceded by unspectacular preparation.</div>
+  <!-- CALLS + NIGHT -->
+  <div class="bottom-row">
+
+    <div class="card">
+      <div class="card-title">Calls</div>
+      <div class="calls-grid" id="callsGrid"></div>
+      <div class="card-quote">Prospecting a day keeps poverty away.</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Night</div>
+      <div class="night-grid" id="nightGrid"></div>
+      <div class="card-quote">Spectacular achievement is always preceded by unspectacular preparation.</div>
+    </div>
+
   </div>
 
   <!-- MEETINGS -->
-  <div class="card" style="margin-top:14px">
+  <div class="card" style="margin-top:16px">
     <div class="card-title">Meetings</div>
     <div class="meetings-grid">
       <textarea class="meeting-cell" id="meeting0" placeholder="Meeting 1…"></textarea>
