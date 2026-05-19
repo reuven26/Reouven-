@@ -121,9 +121,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
 }
 
 /* ── DAILY LAYOUT ── */
-.daily-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start}
-.right-col{display:flex;flex-direction:column;gap:18px}
-.bottom-row{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:18px;align-items:start}
+.daily-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:start}
+.left-col,.right-col{display:flex;flex-direction:column;gap:12px}
 
 /* ── CHECKBOX ── */
 .chk-item{
@@ -330,20 +329,50 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
 
   <div class="daily-grid">
 
-    <!-- HABITS -->
-    <div class="card">
-      <div class="card-title">Habits</div>
-      <div class="habits-grid" id="habitsGrid"></div>
-      <div class="card-quote">For every disciplined effort there is a multiple reward.</div>
-    </div>
+    <!-- LEFT COL -->
+    <div class="left-col">
 
-    <!-- RIGHT: Wake Up + Sport -->
+      <div class="card">
+        <div class="card-title">Habits</div>
+        <div class="habits-grid" id="habitsGrid"></div>
+        <div class="card-quote">For every disciplined effort there is a multiple reward.</div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Spirituality</div>
+        <div class="chk-item" data-key="shaharit" id="row-shaharit">
+          <div class="chk-box" id="chk-shaharit"></div>
+          <span class="chk-icon">🌅</span>
+          <span class="chk-label">Shaharit</span>
+        </div>
+        <div class="chk-item" data-key="minha" id="row-minha">
+          <div class="chk-box" id="chk-minha"></div>
+          <span class="chk-icon">☀️</span>
+          <span class="chk-label">Minha</span>
+        </div>
+        <div class="chk-item" data-key="arvith" id="row-arvith">
+          <div class="chk-box" id="chk-arvith"></div>
+          <span class="chk-icon">🌙</span>
+          <span class="chk-label">Arvith</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Nutrition</div>
+        <div id="nutritionList"></div>
+      </div>
+
+    </div><!-- /left-col -->
+
+    <!-- RIGHT COL -->
     <div class="right-col">
+
       <div class="card">
         <div class="card-title">Wake Up Time</div>
         <input type="time" class="wake-input" id="wakeTime">
         <p class="wake-quote">Lose an hour in the morning, and you will be all day hunting for it.</p>
       </div>
+
       <div class="card">
         <div class="card-title">Sport</div>
         <div class="sport-item">
@@ -364,62 +393,16 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
         </div>
         <div class="card-quote">Choose between what you want now and what you want most.</div>
       </div>
-    </div>
 
-    <!-- SPIRITUALITY -->
-    <div class="card">
-      <div class="card-title">Spirituality</div>
-      <div class="chk-item" data-key="shaharit" id="row-shaharit">
-        <div class="chk-box" id="chk-shaharit"></div>
-        <span class="chk-icon">🌅</span>
-        <span class="chk-label">Shaharit</span>
+      <div class="card">
+        <div class="card-title">Night</div>
+        <div class="night-grid" id="nightGrid"></div>
+        <div class="card-quote">Spectacular achievement is always preceded by unspectacular preparation.</div>
       </div>
-      <div class="chk-item" data-key="minha" id="row-minha">
-        <div class="chk-box" id="chk-minha"></div>
-        <span class="chk-icon">☀️</span>
-        <span class="chk-label">Minha</span>
-      </div>
-      <div class="chk-item" data-key="arvith" id="row-arvith">
-        <div class="chk-box" id="chk-arvith"></div>
-        <span class="chk-icon">🌙</span>
-        <span class="chk-label">Arvith</span>
-      </div>
-    </div>
 
-    <!-- NUTRITION -->
-    <div class="card">
-      <div class="card-title">Nutrition</div>
-      <div id="nutritionList"></div>
-    </div>
+    </div><!-- /right-col -->
 
   </div><!-- /daily-grid -->
-
-  <!-- CALLS + NIGHT -->
-  <div class="bottom-row">
-
-    <div class="card">
-      <div class="card-title">Calls</div>
-      <div class="calls-grid" id="callsGrid"></div>
-      <div class="card-quote">Prospecting a day keeps poverty away.</div>
-    </div>
-
-    <div class="card">
-      <div class="card-title">Night</div>
-      <div class="night-grid" id="nightGrid"></div>
-      <div class="card-quote">Spectacular achievement is always preceded by unspectacular preparation.</div>
-    </div>
-
-  </div>
-
-  <!-- MEETINGS -->
-  <div class="card" style="margin-top:16px">
-    <div class="card-title">Meetings</div>
-    <div class="meetings-grid">
-      <textarea class="meeting-cell" id="meeting0" placeholder="Meeting 1…"></textarea>
-      <textarea class="meeting-cell" id="meeting1" placeholder="Meeting 2…"></textarea>
-      <textarea class="meeting-cell" id="meeting2" placeholder="Meeting 3…"></textarea>
-    </div>
-  </div>
 
 </div><!-- /tab-daily -->
 
