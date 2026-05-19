@@ -241,6 +241,7 @@ body{font-family:'Georgia',serif;background:var(--bg);color:var(--text);min-heig
   <div class="date-center">
     <div class="date-main" id="dateDisplay"></div>
     <div class="date-meta">
+      <span>Day <strong id="dayOfYear"></strong>/365</span>
       <span>Week <strong id="weekNum"></strong></span>
       <span>Month <strong id="monthNum"></strong></span>
       <span>Quarter <strong id="quarterNum"></strong></span>
@@ -455,6 +456,11 @@ function weekNum(d){
 
 function quarter(d){ return Math.floor(d.getMonth()/3)+1; }
 
+function dayOfYear(d){
+  const start = new Date(d.getFullYear(), 0, 0);
+  return Math.floor((d - start) / 864e5);
+}
+
 const MONTHS = ['January','February','March','April','May','June',
                 'July','August','September','October','November','December'];
 const DAYS   = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
@@ -545,6 +551,7 @@ function h(str){ return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').r
 // ── RENDER DATE NAV ───────────────────────────
 function renderDateNav(){
   document.getElementById('dateDisplay').textContent = fmtDate(curDate);
+  document.getElementById('dayOfYear').textContent = dayOfYear(curDate);
   document.getElementById('weekNum').textContent  = weekNum(curDate);
   document.getElementById('monthNum').textContent = curDate.getMonth()+1;
   document.getElementById('quarterNum').textContent = 'Q'+quarter(curDate);
