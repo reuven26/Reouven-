@@ -541,8 +541,6 @@ function emptyDay(){
     sport:{pushups:'',pullups:'',squats:'',run:''},
     prayer:{shaharit:false, minha:false, arvith:false},
     nutrition:[false,false,false,false,false],
-    calls: Array(25).fill(''),
-    meetings:['','',''],
     night:{},
   };
 }
@@ -653,11 +651,6 @@ function renderDaily(){
       <span class="chk-label">Meal ${n}</span>
     </div>`).join('');
 
-  // Calls (25 cells, 5×5)
-  document.getElementById('callsGrid').innerHTML = data.calls.map((v,i)=>`
-    <input class="call-cell" data-call="${i}" type="text" value="${h(v)}" placeholder="—" title="Double-click to mark done">`
-  ).join('');
-
   // Night
   document.getElementById('nightGrid').innerHTML = NIGHT.map(n=>`
     <div class="night-item" data-night="${n.id}">
@@ -666,11 +659,6 @@ function renderDaily(){
       <span style="font-size:13px">${n.label}</span>
     </div>`).join('');
 
-  // Meetings
-  data.meetings.forEach((m,i)=>{
-    const el = document.getElementById('meeting'+i);
-    if(el) el.value = m||'';
-  });
 }
 
 // ── RENDER GOALS ──────────────────────────────
@@ -853,25 +841,6 @@ document.getElementById('wakeTime').addEventListener('change',e=>{
   document.getElementById('s'+name).addEventListener('input',e=>{
     getDay(curDate).sport[name.toLowerCase()] = parseFloat(e.target.value)||'';
     updateProgress(); scheduleSave();
-  });
-});
-
-// Calls (delegated input + dblclick to mark done)
-document.getElementById('callsGrid').addEventListener('input',e=>{
-  if(!e.target.matches('[data-call]')) return;
-  getDay(curDate).calls[+e.target.dataset.call] = e.target.value;
-  scheduleSave();
-});
-document.getElementById('callsGrid').addEventListener('dblclick',e=>{
-  if(!e.target.matches('[data-call]')) return;
-  e.target.classList.toggle('done');
-});
-
-// Meetings
-[0,1,2].forEach(i=>{
-  document.getElementById('meeting'+i).addEventListener('input',e=>{
-    getDay(curDate).meetings[i] = e.target.value;
-    scheduleSave();
   });
 });
 
