@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>Mon assistant</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%231f8a5b'/%3E%3Cpath d='M9 16.5l4.5 4.5L23 11' fill='none' stroke='%23fff' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <aside class="nav">
+    <div class="brand"><span class="logo" aria-hidden="true"></span><span>Mon assistant</span></div>
+    <nav id="tabs" aria-label="Vues">
+      <button data-view="today" class="active"><span class="ico">☀️</span><span>Aujourd'hui</span></button>
+      <button data-view="calendar"><span class="ico">🗓</span><span>Calendrier</span></button>
+      <button data-view="followups"><span class="ico">📞</span><span>Relances</span></button>
+      <button data-view="whatsapp"><span class="ico">💬</span><span>WhatsApp</span><i id="wa-dot" class="dot"></i></button>
+    </nav>
+    <div class="nav-foot" id="nav-foot"></div>
+  </aside>
+
+  <main>
+    <header class="top">
+      <div>
+        <h1 id="view-title">Aujourd'hui</h1>
+        <p id="view-sub" class="muted"></p>
+      </div>
+      <button id="add-btn" class="btn primary">+ Ajouter</button>
+    </header>
+    <div id="banner" class="banner" hidden></div>
+    <section id="view"></section>
+  </main>
+
+  <dialog id="dlg">
+    <form id="form" method="dialog">
+      <h2 id="dlg-title">Nouvel élément</h2>
+      <label>Titre<input name="title" required maxlength="300" autocomplete="off"></label>
+      <div class="row">
+        <label>Catégorie<select name="category"></select></label>
+        <label>Statut<select name="status"></select></label>
+      </div>
+      <div class="row">
+        <label>Date<input name="date" type="date"></label>
+        <label>Heure<input name="time" type="time"></label>
+      </div>
+      <label>Contact / client<input name="contact" maxlength="200" autocomplete="off"></label>
+      <label>Notes<textarea name="notes" rows="3" maxlength="2000"></textarea></label>
+      <p id="form-err" class="err" hidden></p>
+      <div class="actions">
+        <button type="button" id="del-btn" class="btn danger" hidden>Supprimer</button>
+        <span class="grow"></span>
+        <button type="button" id="cancel-btn" class="btn">Annuler</button>
+        <button type="submit" class="btn primary">Enregistrer</button>
+      </div>
+    </form>
+  </dialog>
+  <div id="toast" class="toast" hidden></div>
+  <script src="app.js" type="module"></script>
+</body>
+</html>

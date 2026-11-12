@@ -1,0 +1,89 @@
+# Assistant personnel WhatsApp — stack unifiée
+#   openwa    : passerelle WhatsApp (https://github.com/rmyndharis/OpenWA), moteur Baileys
+#   backend   : API + agent IA + planificateur de rappels (SQLite)
+#   dashboard : interface web (nginx) -> http://localhost:3000
+# Lancement : ./setup.sh   (génère .env puis `docker compose up -d --build`)
+
+services:
+  openwa:
+    image: ghcr.io/rmyndharis/openwa:${OPENWA_VERSION:-latest}
+    container_name: assistant-openwa
+    restart: unless-stopped
+    stop_grace_period: 75s
+    security_opt:
+      - "no-new-privileges:true"
+    cap_drop: [ALL]
+    cap_add: [CHOWN, DAC_OVERRIDE, FOWNER, KILL, SETGID, SETUID]
+    read_only: true
+    tmpfs:
+      - /tmp
+    mem_limit: ${OPENWA_MEM_LIMIT:-1g}
+    ports:
+      - "127.0.0.1:2785:2785" # API + dashboard natif OpenWA
+    environment:
+      - NODE_ENV=production
+      - TZ=${TIMEZONE:-UTC}
+      - HOME=/tmp
+      - XDG_CONFIG_HOME=/tmp/.config
+      - XDG_CACHE_HOME=/tmp/.cache
+      - PORT=2785
+      - LOG_LEVEL=${OPENWA_LOG_LEVEL:-info}
+      # Moteur Baileys : pas de Chromium, RAM minimale
+      - ENGINE_TYPE=baileys
+      - AUTO_START_SESSIONS=true
+      # Clé admin (X-API-Key) semée au premier démarrage — générée par setup.sh
+      - API_MASTER_KEY=${OPENWA_API_KEY:?Lancez ./setup.sh pour générer le fichier .env}
+      # Autorise OpenWA à livrer ses webhooks au conteneur backend (réseau privé)
+      - SSRF_ALLOWED_HOSTS=backend
+      # Ajoute senderPhone quand WhatsApp masque l'expéditeur derrière un @lid
+      - RESOLVE_LID_TO_PHONE=true
+      # Notes vocales incluses en base64 dans le webhook (jusqu'à 16 Mio)
+      - WEBHOOK_MEDIA_INLINE_MAX_BYTES=16777216
+      - WEBHOOK_MAX_PAYLOAD_BYTES=25000000
+      - WEBHOOK_TIMEOUT=10000
+      - WEBHOOK_RETRY_DELAY=5000
+      # Ne pas couper les notifications du téléphone quand la passerelle est connectée
+      - BAILEYS_MARK_ONLINE_ON_CONNECT=false
+      - CSP_UPGRADE_INSECURE_REQUESTS=false
+    volumes:
+      - openwa-data:/app/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:2785/api/health/ready"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  backend:
+    build: ./backend
+    container_name: assistant-backend
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      - OPENWA_URL=http://openwa:2785
+      - WEBHOOK_CALLBACK_URL=http://backend:4000/webhooks/openwa
+      - DATA_DIR=/data
+      - PORT=4000
+    volumes:
+      - assistant-data:/data
+    depends_on:
+      openwa:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:4000/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
+  dashboard:
+    build: ./dashboard
+    container_name: assistant-dashboard
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3000:80"
+    depends_on:
+      - backend
+
+volumes:
+  openwa-data:
+  assistant-data:

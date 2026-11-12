@@ -1,0 +1,9 @@
+{
+  "name": "whatsapp-assistant-backend",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Agent IA + API + planificateur de rappels (aucune dépendance npm : Node 22 natif)",
+  "scripts": { "start": "node src/server.js", "test": "node --test" },
+  "engines": { "node": ">=22.13" }
+}
